@@ -5,11 +5,12 @@ import (
   "bufio"
   "os"
   "net"
-  //"io/ioutil"
+  "io/ioutil"
   "time"
   "strings"
 )
 
+const DefaultPort string = "5050"
 
 func main(){
   // configure port number
@@ -21,15 +22,14 @@ func main(){
   // kill listener when finished
   defer socket.Close()
 
-  // wait for incomming connections
   for {
+    // wait for incomming connections
     conn, err := socket.Accept()
     if err != nil {
       fmt.Println("Incomming connection failed :(")
       time.Sleep(500 * time.Millisecond)
       continue
     } else {
-      fmt.Println("Recieved connection!")
       request := PrintRequest(conn)
       if request != "" { // if request read successfully
         go HandleRequest(conn, request)
@@ -42,7 +42,7 @@ func SetPort() string {
   if len(os.Args) > 1 {
     return os.Args[1]
   } else {
-    return "5000"
+    return DefaultPort
   }
 }
 
@@ -66,6 +66,7 @@ func PrintRequest(conn net.Conn) string {
     fmt.Println("Error in reading request .. Possible corruption")
     return ""
   } else {
+    // remove break char from the end
     StringifiedPacket := string(packet)[:len(packet)-1]
     fmt.Println(StringifiedPacket)
     return StringifiedPacket
@@ -73,14 +74,43 @@ func PrintRequest(conn net.Conn) string {
 }
 
 func HandleRequest(conn net.Conn, req string){
-  // GET / HTTP/1.0
+  // GET /index.html HTTP/1.0
   // POST / HTTP/1.0
   tokens := strings.Split(req, " ")
   if tokens[0] == "GET" {
-    go GetRoutine(conn, tokens[1:])
+    go GetRoutine(conn, FixSource(tokens[1]))
   } else if tokens[0] == "POST" {
-    go PostRoutine(conn, tokens[1:])
+    go PostRoutine(conn, FixSource(tokens[1]))
   } else {
     fmt.Println("Sorry, unsupported HTTP method!")
+    conn.Close()
+  }
+}
+
+func GetRoutine(conn net.Conn, source string){
+  // close connection when finished
+  defer conn.Close()
+  fmt.Println(source)
+  file, err := ioutil.ReadFile(source)
+  if err != nil {
+        // file was not found
+        fmt.Println(strings.Join([]string{"File", source, "Cannot be found"}, " "))
+        conn.Write([]byte("HTTP/1.0 404 Not Found\r\n"))
+    } else {
+        // file found
+        //conn.Write([]byte("HTTP/1.0 200 OK\r\n"))
+        conn.Write(file)
+    }
+}
+
+func PostRoutine(conn net.Conn, source string){
+
+}
+
+func FixSource(source string) string {
+  if source == "/" {
+    return "resources/index.html"
+  } else {
+    return strings.Join([]string{"./resources", source}, "")
   }
 }
