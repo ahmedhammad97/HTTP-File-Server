@@ -4,6 +4,7 @@ import (
   "fmt"
   "bufio"
   "os"
+  "io"
   "net"
   "io/ioutil"
   "time"
@@ -76,6 +77,8 @@ func PrintRequest(conn net.Conn) string {
 func HandleRequest(conn net.Conn, req string){
   // GET /index.html HTTP/1.0
   // POST / HTTP/1.0
+  // close connection when finished
+  defer conn.Close()
   tokens := strings.Split(req, " ")
   if tokens[0] == "GET" {
     go GetRoutine(conn, FixSource(tokens[1]))
@@ -88,9 +91,6 @@ func HandleRequest(conn net.Conn, req string){
 }
 
 func GetRoutine(conn net.Conn, source string){
-  // close connection when finished
-  defer conn.Close()
-  fmt.Println(source)
   file, err := ioutil.ReadFile(source)
   if err != nil {
         // file was not found
@@ -98,19 +98,28 @@ func GetRoutine(conn net.Conn, source string){
         conn.Write([]byte("HTTP/1.0 404 Not Found\r\n"))
     } else {
         // file found
-        //conn.Write([]byte("HTTP/1.0 200 OK\r\n"))
+        conn.Write([]byte("HTTP/1.0 200 OK\r\n"))
         conn.Write(file)
     }
 }
 
 func PostRoutine(conn net.Conn, source string){
-
+  conn.Write([]byte("HTTP/1.0 200 OK\r\n"))
+	file, err := os.Create(source)
+  if err != nil {
+    fmt.Println("Cannot create file " + source)
+    fmt.Println(err)
+    return
+  }
+  defer file.Close()
+  io.Copy(file, conn)
+  fmt.Println(strings.Join([]string{"File", source, "stored successfully"}, " "))
 }
 
 func FixSource(source string) string {
   if source == "/" {
     return "resources/index.html"
   } else {
-    return strings.Join([]string{"./resources", source}, "")
+    return strings.Join([]string{"resources", source}, "")
   }
 }
