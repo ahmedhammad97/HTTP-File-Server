@@ -97,9 +97,10 @@ func GetRoutine(conn net.Conn, source string){
         conn.Write([]byte("HTTP/1.0 404 Not Found\r\n"))
     } else {
         // file found
-        conn.Write([]byte("HTTP/1.0 200 OK\r\n"))
+        conn.Write([]byte("HTTP/1.0 200 OK\n"))
         conn.Write(file)
-        conn.Write([]byte("\r\n"))
+        conn.Write([]byte("\n"))
+        fmt.Println("Done!")
     }
 }
 

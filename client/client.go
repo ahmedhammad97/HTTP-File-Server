@@ -6,7 +6,7 @@ import (
   "os"
   "strings"
   "net"
-  "io"
+  //"io"
 )
 
 func main (){
@@ -14,11 +14,10 @@ func main (){
   for {
     command := ReadCommand(reader)
     tokens := strings.Split(command, " ")
-    conn := EstablishConnection(tokens)
-    HandleCommand(tokens, conn)
-
+    socket := EstablishConnection(tokens)
+    defer socket.Close()
+    HandleCommand(tokens, socket)
   }
-
 }
 
 func ReadCommand(reader *bufio.Reader) string {
@@ -30,23 +29,38 @@ func ReadCommand(reader *bufio.Reader) string {
 func EstablishConnection(tokens []string) net.Conn {
   port := "80"
   if len(tokens) > 3 {
-    port = tokens[3]
+    port = strings.Trim(tokens[3], " ")
   }
-  conn, err := net.Dial("tcp", tokens[2]+":"+port)
+  host := fmt.Sprintf("%s:%s",strings.Trim(tokens[2], " "), port)
+  socket, err := net.Dial("tcp", strings.Trim(host, "\n"))
 	if err != nil {
-		fmt.Println("Error establishing connection: ", err.Error())
+		fmt.Println("Error establishing connection:", err.Error())
 	}
-  return conn
+  return socket
 }
 
 func HandleCommand(tokens []string, conn net.Conn){
-  defer conn.Close
   if tokens[0] == "GET" {
-    // Call GET subroutine
+    GetRoutine(strings.Trim(tokens[1], " "), conn)
   } else if tokens[0] == "POST" {
     // Call POST subroutine
   } else {
     panic("Unsupported command " + tokens[0])
-    return
   }
+}
+
+func GetRoutine(source string, conn net.Conn){
+  conn.Write([]byte("GET /" + source + " HTTP/1.0\n"))
+  packet, err := bufio.NewReader(conn).ReadBytes('\n')
+  if err != nil {
+    fmt.Println("Error in reading request .. Possible corruption")
+  } else {
+    // remove break char from the end
+    StringifiedPacket := string(packet)[:len(packet)-1]
+    fmt.Println(StringifiedPacket)
+  }
+}
+
+func PostRoutine(source string, conn net.Conn){
+
 }
