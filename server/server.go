@@ -86,7 +86,6 @@ func HandleRequest(conn net.Conn, req string){
     go PostRoutine(conn, FixSource(tokens[1]))
   } else {
     fmt.Println("Sorry, unsupported HTTP method!")
-    conn.Close()
   }
 }
 
@@ -100,6 +99,7 @@ func GetRoutine(conn net.Conn, source string){
         // file found
         conn.Write([]byte("HTTP/1.0 200 OK\r\n"))
         conn.Write(file)
+        conn.Write([]byte("\r\n"))
     }
 }
 
