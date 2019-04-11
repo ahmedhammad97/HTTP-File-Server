@@ -6,7 +6,7 @@ import (
   "os"
   "strings"
   "net"
-  //"io"
+  "io"
 )
 
 func main (){
@@ -51,16 +51,18 @@ func HandleCommand(tokens []string, conn net.Conn){
 
 func GetRoutine(source string, conn net.Conn){
   conn.Write([]byte("GET /" + source + " HTTP/1.0\n"))
-  packet, err := bufio.NewReader(conn).ReadBytes('\n')
-  if err != nil {
-    fmt.Println("Error in reading request .. Possible corruption")
-  } else {
-    // remove break char from the end
-    StringifiedPacket := string(packet)[:len(packet)-1]
-    fmt.Println(StringifiedPacket)
-  }
+  message, _ := bufio.NewReader(conn).ReadString('\n')
+  fmt.Println("Message recieved: " + message)
+  file, err := os.Create(FixSource(source))
+  if err != nil {panic(err)}
+  io.Copy(file, conn)
+  fmt.Println("File " + source + " stored successfully")
 }
 
 func PostRoutine(source string, conn net.Conn){
 
+}
+
+func FixSource(source string) string {
+  return "resources/" + source
 }
