@@ -7,6 +7,8 @@ import (
   "strings"
   "net"
   "io"
+  "io/ioutil"
+  "bytes"
 )
 
 func main (){
@@ -43,7 +45,7 @@ func HandleCommand(tokens []string, conn net.Conn){
   if tokens[0] == "GET" {
     GetRoutine(strings.Trim(tokens[1], " "), conn)
   } else if tokens[0] == "POST" {
-    // Call POST subroutine
+    PostRoutine(strings.Trim(tokens[1], " "), conn)
   } else {
     panic("Unsupported command " + tokens[0])
   }
@@ -51,60 +53,43 @@ func HandleCommand(tokens []string, conn net.Conn){
 
 func GetRoutine(source string, conn net.Conn){
   conn.Write([]byte("GET /" + source + " HTTP/1.0\n"))
-  packet1, err := bufio.NewReader(conn).ReadBytes('\n')
+  packet, err := bufio.NewReader(conn).ReadBytes('\n')
 
   if err != nil {
     fmt.Println("Error in reading request .. Possible corruption")
-  } else {
-    // remove break char from the end
-    StringifiedPacket := string(packet1)[:len(packet1)-1]
-    fmt.Println(StringifiedPacket)
-    if strings.Contains(StringifiedPacket, "200"){
-      //MUST LOOK FOR EOF TO READ ALL FILE
-      packet2 := bufio.NewReader(conn)
-      for {
-        line, err := packet2.ReadString('\n')
-        if len(line) == 0 && err != nil {
-          if err == io.EOF {
-            break
-          }
-          fmt.Println("Error in reading request .. Possible corruption")
-        }
-        line = strings.TrimSuffix(line, "\n")
-        fmt.Println(line)
-        if err != nil {
-          if err == io.EOF {
-            break
-          }
-          fmt.Println("Error in reading request .. Possible corruption")
-        }
-    }      // if err2 != nil {
-      //   fmt.Println("Error in reading request .. Possible corruption")
-      // } else {
-      //   // remove break char from the end
-      //   fmt.Println(len(packet2))
-      //   StringifiedPacket1 := string(packet2)[:len(packet2)-1]
-      //   fmt.Println(StringifiedPacket1)
-      // }
-    }
+    panic(err)
+  }
+
+  fmt.Println(string(packet))
+
+  if strings.Contains(string(packet), "200"){
+    file, FileErr := os.Create(FixSource(source))
+    if FileErr != nil {panic(err)}
+    _, CopyErr := io.Copy(file, conn)
+    if CopyErr != nil {panic(CopyErr)}
   }
 }
 
 func PostRoutine(source string, conn net.Conn){
-  conn.Write([]byte("POST /" + source + " HTTP/1.0\n"))
-  reader := bufio.NewReader(os.Stdin)
-  if strings.Contains(source,".txt"){
-    text, _ := reader.ReadString('\n')
-    conn.Write([]byte(text + "\n"))
-  }
-
-  packet1, err := bufio.NewReader(conn).ReadBytes('\n')
+  file, err := ioutil.ReadFile(FixSource(source))
   if err != nil {
-    fmt.Println("Error in reading request .. Possible corruption")
+    // file was not found
+    fmt.Println("File" + source + "Cannot be found")
   } else {
-    // remove break char from the end
-    StringifiedPacket := string(packet1)[:len(packet1)-1]
-    fmt.Println(StringifiedPacket)
+    // file found
+    conn.Write([]byte("POST /" + source + " HTTP/1.0\n"))
+    packet, err := bufio.NewReader(conn).ReadBytes('\n')
+    if err != nil {
+      fmt.Println("Error in reading request .. Possible corruption")
+      panic(err)
+    }
+
+    fmt.Println(string(packet))
+
+    if strings.Contains(string(packet), "200"){
+      _, err3 := io.Copy(conn, bytes.NewReader(file))
+      if err3 != nil {panic(err3)}
+    }
   }
 }
 
