@@ -91,5 +91,19 @@ func GetRoutine(source string, conn net.Conn){
 }
 
 func PostRoutine(source string, conn net.Conn){
-
+  conn.Write([]byte("POST /" + source + " HTTP/1.0\n"))
+  reader := bufio.NewReader(os.Stdin)
+  if strings.Contains(source,".txt"){
+    text, _ := reader.ReadString('\n')
+    conn.Write([]byte(text + "\n"))
+  }
+  
+  packet1, err := bufio.NewReader(conn).ReadBytes('\n')
+  if err != nil {
+    fmt.Println("Error in reading request .. Possible corruption")
+  } else {
+    // remove break char from the end
+    StringifiedPacket := string(packet1)[:len(packet1)-1]
+    fmt.Println(StringifiedPacket)
+  }
 }
