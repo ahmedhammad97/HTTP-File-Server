@@ -4,7 +4,7 @@ import (
   "fmt"
   "bufio"
   "os"
-  "io"
+  // "io"
   "net"
   "io/ioutil"
   "time"
@@ -78,7 +78,7 @@ func HandleRequest(conn net.Conn, req string){
   // GET /index.html HTTP/1.0
   // POST / HTTP/1.0
   // close connection when finished
-  defer conn.Close()
+  // defer conn.Close()
   tokens := strings.Split(req, " ")
   if tokens[0] == "GET" {
     go GetRoutine(conn, FixSource(tokens[1]))
@@ -99,22 +99,29 @@ func GetRoutine(conn net.Conn, source string){
         // file found
         conn.Write([]byte("HTTP/1.0 200 OK\n"))
         conn.Write(file)
-        conn.Write([]byte("\n"))
         fmt.Println("Done!")
     }
 }
 
 func PostRoutine(conn net.Conn, source string){
-  conn.Write([]byte("HTTP/1.0 200 OK\r\n"))
-	file, err := os.Create(source)
+  fmt.Println(source)
+  file, err := os.Create(source)
   if err != nil {
     fmt.Println("Cannot create file " + source)
     fmt.Println(err)
     return
   }
   defer file.Close()
-  io.Copy(file, conn)
-  fmt.Println(strings.Join([]string{"File", source, "stored successfully"}, " "))
+  if strings.Contains(source,".txt"){
+    packet, _ := bufio.NewReader(conn).ReadBytes('\n')
+    fmt.Fprintf(file, string(packet))
+  }
+
+  conn.Write([]byte("HTTP/1.0 200 OK\r\n"))
+  
+  // io.Copy(file, conn)
+  // fmt.Println(strings.Join([]string{"File", source, "stored successfully"}, " "))
+  fmt.Println("Done!")
 }
 
 func FixSource(source string) string {
