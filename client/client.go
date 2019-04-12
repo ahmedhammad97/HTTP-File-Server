@@ -74,7 +74,7 @@ func PostRoutine(source string, conn net.Conn){
   file, err := ioutil.ReadFile(FixSource(source))
   if err != nil {
     // file was not found
-    fmt.Println("File" + source + "Cannot be found")
+    fmt.Println("File " + source + " Cannot be found")
   } else {
     // file found
     conn.Write([]byte("POST /" + source + " HTTP/1.0\n"))

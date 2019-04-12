@@ -91,7 +91,7 @@ func GetRoutine(conn net.Conn, source string){
   file, err := ioutil.ReadFile(source)
   if err != nil {
     // file was not found
-    fmt.Println("File" + source + "Cannot be found")
+    fmt.Println("File " + source + " Cannot be found")
     conn.Write([]byte("HTTP/1.0 404 Not Found\r\n"))
   } else {
     // file found
