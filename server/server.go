@@ -78,7 +78,7 @@ func HandleRequest(conn net.Conn, req string){
   // GET /index.html HTTP/1.0
   // POST / HTTP/1.0
   // close connection when finished
-  defer conn.Close()
+  // defer conn.Close()
   tokens := strings.Split(req, " ")
   if tokens[0] == "GET" {
     go GetRoutine(conn, FixSource(tokens[1]))
@@ -99,7 +99,6 @@ func GetRoutine(conn net.Conn, source string){
         // file found
         conn.Write([]byte("HTTP/1.0 200 OK\n"))
         conn.Write(file)
-        conn.Write([]byte("\n"))
         fmt.Println("Done!")
     }
 }
