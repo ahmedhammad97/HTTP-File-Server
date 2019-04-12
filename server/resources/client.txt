@@ -1,0 +1,3 @@
+This is a text file
+that resides in client side
+it has 3 lines as you can tell.

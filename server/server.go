@@ -4,11 +4,12 @@ import (
   "fmt"
   "bufio"
   "os"
-  // "io"
+  "io"
   "net"
   "io/ioutil"
   "time"
   "strings"
+  "bytes"
 )
 
 const DefaultPort string = "5050"
@@ -75,10 +76,6 @@ func PrintRequest(conn net.Conn) string {
 }
 
 func HandleRequest(conn net.Conn, req string){
-  // GET /index.html HTTP/1.0
-  // POST / HTTP/1.0
-  // close connection when finished
-  // defer conn.Close()
   tokens := strings.Split(req, " ")
   if tokens[0] == "GET" {
     go GetRoutine(conn, FixSource(tokens[1]))
@@ -90,38 +87,33 @@ func HandleRequest(conn net.Conn, req string){
 }
 
 func GetRoutine(conn net.Conn, source string){
+  defer conn.Close()
   file, err := ioutil.ReadFile(source)
   if err != nil {
-        // file was not found
-        fmt.Println(strings.Join([]string{"File", source, "Cannot be found"}, " "))
-        conn.Write([]byte("HTTP/1.0 404 Not Found\r\n"))
-    } else {
-        // file found
-        conn.Write([]byte("HTTP/1.0 200 OK\n"))
-        conn.Write(file)
-        fmt.Println("Done!")
-    }
+    // file was not found
+    fmt.Println("File" + source + "Cannot be found")
+    conn.Write([]byte("HTTP/1.0 404 Not Found\r\n"))
+  } else {
+    // file found
+    conn.Write([]byte("HTTP/1.0 200 OK\r\n"))
+    _, err3 := io.Copy(conn, bytes.NewReader(file))
+    if err3 != nil {panic(err3)}
+  }
 }
 
 func PostRoutine(conn net.Conn, source string){
-  fmt.Println(source)
+  defer conn.Close()
   file, err := os.Create(source)
   if err != nil {
     fmt.Println("Cannot create file " + source)
-    fmt.Println(err)
-    return
+    panic(err)
   }
   defer file.Close()
-  if strings.Contains(source,".txt"){
-    packet, _ := bufio.NewReader(conn).ReadBytes('\n')
-    fmt.Fprintf(file, string(packet))
-  }
 
   conn.Write([]byte("HTTP/1.0 200 OK\r\n"))
-  
-  // io.Copy(file, conn)
-  // fmt.Println(strings.Join([]string{"File", source, "stored successfully"}, " "))
-  fmt.Println("Done!")
+
+  io.Copy(file, conn)
+  fmt.Println("File " + source + " stored successfully")
 }
 
 func FixSource(source string) string {
