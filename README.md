@@ -1,44 +1,61 @@
 # HTTP Client and server
 
-This project is a protocol for client server file exchange
+This project is an implementation for a web file server, and a web client, that uses simple version of HTTP protocol to send and receive files.
 
 ### Prerequisites
 
-you will need to install Golang follow instructions for [Go](https://golang.org/doc/install)
+1. You will need to install Golang, follow instructions from [Go Docs.](https://golang.org/doc/install)
 
-### Installing
+2. Copy the project file to Go workspace located (usually) in your home directory.
 
-first you need to copy the project file to Go work space
+3. From your terminal, navigate to project's folder.
 
-then open your terminal and navigate to Project folder
+
+### Running the Server
+Head to the server folder
 
 ```bash
-$cd <folder path>
+$cd <server>
 ```
 
-then run
+Then run
 
 ```bash
 $go build
 ```
 
-you will need to run the server side
+A binary file should be created in the same directory, which then you can run using:
 
 ```bash
-$go run server.go
+$./server (optional port number)
 ```
 
-then you need to run the client side on the client device
+Now you should have the server running.
+
+### Running the Client
+From the project's folder, head to the client folder
 
 ```bash
-$go run client.go
+$cd <client>
 ```
 
-now your protocol is running
+Then run
 
-## Running the tests
+```bash
+$go build
+```
 
-Enter the http v1.0 request sintax on the client side as follows
+A binary file should be created in the same directory, which then you can run using:
+
+```bash
+$./client
+```
+
+Now you should have the client running.
+
+### Running the tests
+
+In the running client terminal, enter the HTTP/1.0 request as follows:
 
 For GET request
 
@@ -52,12 +69,14 @@ For Post request
 POST file-name host-name (port-number)
 ```
 
-## Built With
 
-- [Go](https://golang.org/doc/)
+
+## Resources 
+
+- [Go Docs](https://golang.org/doc/)
 
 ## Authors
 
-- Ahmed hammad
+- Ahmed Hammad
 - Mohamed Tarek
-- Ismail el Yamany
+- Ismail El-Yamany
