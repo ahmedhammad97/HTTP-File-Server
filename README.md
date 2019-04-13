@@ -1,4 +1,4 @@
-# HTTP Client and server
+# HTTP Client and Server
 
 This project is an implementation for a web file server, and a web client, that uses simple version of HTTP protocol to send and receive files.
 
@@ -36,7 +36,7 @@ Now you should have the server running.
 From the project's folder, head to the client folder
 
 ```bash
-$cd <client> (optional port number)
+$cd <client>
 ```
 
 Then run
@@ -48,7 +48,7 @@ $go build
 A binary file should be created in the same directory, which then you can run using:
 
 ```bash
-$./client
+$./client (optional port number)
 ```
 
 Now you should have the client running.
