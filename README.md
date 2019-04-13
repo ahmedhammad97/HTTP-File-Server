@@ -1,4 +1,4 @@
-#HTTP Client and server
+# HTTP Client and server
 
 This project is a protocol for client server file exchange
 
@@ -58,6 +58,6 @@ POST file-name host-name (port-number)
 
 ## Authors
 
-- **Billie Thompson** - _Initial work_ - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+- Ahmed hammad
+- Mohamed Tarek
+- Ismail el Yamany
