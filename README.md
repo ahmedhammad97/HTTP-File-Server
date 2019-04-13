@@ -36,7 +36,7 @@ Now you should have the server running.
 From the project's folder, head to the client folder
 
 ```bash
-$cd <client>
+$cd <client> (optional port number)
 ```
 
 Then run
@@ -71,11 +71,11 @@ POST file-name host-name (port-number)
 
 
 
-## Resources 
+### Resources 
 
 - [Go Docs](https://golang.org/doc/)
 
-## Authors
+### Authors
 
 - Ahmed Hammad
 - Mohamed Tarek
