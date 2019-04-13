@@ -92,10 +92,10 @@ func GetRoutine(conn net.Conn, source string){
   if err != nil {
     // file was not found
     fmt.Println("File " + source + " Cannot be found")
-    conn.Write([]byte("HTTP/1.0 404 Not Found\r\n"))
+    conn.Write([]byte("HTTP/1.0 404 Not Found\r\n\r\n"))
   } else {
     // file found
-    conn.Write([]byte("HTTP/1.0 200 OK\r\n"))
+    conn.Write([]byte("HTTP/1.0 200 OK\r\n\r\n"))
     _, err3 := io.Copy(conn, bytes.NewReader(file))
     if err3 != nil {panic(err3)}
   }
@@ -110,7 +110,7 @@ func PostRoutine(conn net.Conn, source string){
   }
   defer file.Close()
 
-  conn.Write([]byte("HTTP/1.0 200 OK\r\n"))
+  conn.Write([]byte("HTTP/1.0 200 OK\r\n\r\n"))
 
   io.Copy(file, conn)
   fmt.Println("File " + source + " stored successfully")
