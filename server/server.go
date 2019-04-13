@@ -41,6 +41,7 @@ func main(){
 }
 
 func SetPort() string {
+  // if custom port is specified
   if len(os.Args) > 1 {
     return os.Args[1]
   } else {
@@ -87,6 +88,7 @@ func HandleRequest(conn net.Conn, req string){
 }
 
 func GetRoutine(conn net.Conn, source string){
+  // close connection when finished
   defer conn.Close()
   file, err := ioutil.ReadFile(source)
   if err != nil {
@@ -102,16 +104,19 @@ func GetRoutine(conn net.Conn, source string){
 }
 
 func PostRoutine(conn net.Conn, source string){
+  // close connection when finished
   defer conn.Close()
   file, err := os.Create(source)
   if err != nil {
     fmt.Println("Cannot create file " + source)
     panic(err)
   }
+  // close file when finished
   defer file.Close()
 
   conn.Write([]byte("HTTP/1.0 200 OK\r\n\r\n"))
 
+  // copy bytes from connection to the file
   io.Copy(file, conn)
   fmt.Println("File " + source + " stored successfully")
 }
